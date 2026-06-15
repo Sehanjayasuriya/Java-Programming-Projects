@@ -1,0 +1,139 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This abstract class represents a Tour
+in the Travel Australia Booking System.
+
+This class is the parent class for:
+- CityTour
+- AttractionsTour
+- QueenslandTour
+- InternationalTour
+
+Features:
+- Stores common booking details
+- Generates unique ticket numbers
+- Applies family discounts
+- Stores sales executive details
+- Handles cancellation status
+
+This class also forces child classes
+to implement:
+- displayTour()
+- calculatePrice()
+*/
+
+public abstract class Tour {
+
+    private String tourName;
+    private double adultPrice; //price for one adult
+    private double childPrice;
+    private int adultCount; //how many adults booked
+    private int childCount;
+    
+    // unique ticket number
+    private int ticketNumber;
+    
+    // booking cancellation status
+    private boolean cancelled = false;
+    
+    // sales executive who sold ticket
+    private String salesExecutiveName;
+    
+    // static counter for ticket generation
+    private static int counter = 1000;
+    
+
+    //Constructor Used to initialize tour details
+    public Tour(
+    		String tourName,
+    		double adultPrice,
+    		double childPrice,
+    		int adultCount,
+    		int childCount,
+    		String salesExecutiveName
+    		){
+
+    	// initialize
+        this.tourName = tourName;
+        this.adultPrice = adultPrice;
+        this.childPrice = childPrice;
+        this.adultCount = adultCount;
+        this.childCount = childCount;
+        this.salesExecutiveName = salesExecutiveName;
+        
+        // generate unique ticket number
+        ticketNumber = counter++;
+
+    }
+
+    //used abstract method now every child class must create its own displayTour()
+    public abstract void displayTour(); 
+    
+    //Child classes must calculate price
+    public abstract double calculatePrice();
+    
+    public double applyDiscount(double total) {
+    	int totalPeople = adultCount + childCount;
+    	
+    	//10% discount for 1 adult and 1 child or 2 adults and 1 child
+    	if((adultCount == 1 && childCount == 1) || (adultCount == 2 && childCount == 1)) {
+    		total = total - (total*0.10);
+    	}
+    	
+    	//15% discount for family with 4 or more
+    	else if(totalPeople >= 4) {
+    		total = total-(total*0.15);
+    	}
+    	return total;
+    }
+    
+    //getters
+    
+    //Getter method for cancellation status Returns true if booking cancelled
+    public boolean isCancelled() {
+        return cancelled;
+    }
+    
+    public String getTourName() {
+    	return tourName;
+    }
+    
+    public double getAdultPrice() {
+    	return adultPrice;
+    }
+    
+    public int getTicketNumber() {
+    	return ticketNumber;
+    }
+    
+    public double getChildPrice() {
+    	return childPrice;
+    }
+    
+    public int getAdultCount() {
+    	return adultCount;
+    }
+    
+    public int getChildCount() {
+    	return childCount;
+    }
+    
+    public String getSalesExecutiveName() {
+        return salesExecutiveName;
+    }
+    
+    //Setters
+    public void setSalesExecutiveName(String salesExecutiveName) {
+        this.salesExecutiveName = salesExecutiveName;
+    }
+    
+    //Setter method for cancellation status
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+        
+    
+}
