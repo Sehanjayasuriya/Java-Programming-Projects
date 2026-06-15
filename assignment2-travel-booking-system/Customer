@@ -1,0 +1,57 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This class represents a customer in the
+Travel Australia Booking System.
+
+This class is used to store customer details
+such as customer name and contact number.
+
+Features:
+- Stores customer information
+- Displays customer details
+- Supports constructor overloading
+*/
+
+public class Customer {
+	
+	//instance variables
+	// stores customer name
+	private String customerName;
+	
+	// stores customer contact number
+	private String contactNumber;
+
+	//constructor Used to create a customer object with name and contact number
+	public Customer(String customerName, String contactNumber) {
+		this.customerName=customerName;
+		this.contactNumber=contactNumber;
+	}
+	
+	
+	//Overloaded constructor Used when only customer name is provided
+	public Customer(String customerName) {
+
+	    this.customerName = customerName;
+	    this.contactNumber = "Not Provided";
+
+	}
+	
+	//getters
+	public String getCustomerName() {
+		return customerName;
+	}
+	
+	public String getContactNumber() {
+		return contactNumber;
+	}
+	
+	public void displayCustomer() {
+		System.out.println("Customer Name: " + customerName);
+		System.out.println("Contact Number: " + contactNumber);
+	}
+
+
+}
