@@ -1,0 +1,28 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This class represents a Sales Executive
+in the Travel Australia Booking System.
+
+This class inherits from the User class.
+
+Sales Executives can:
+- Login to the system
+- Create bookings
+- Search bookings
+- Cancel bookings
+- Generate sales
+*/
+public class SalesExecutive extends User {
+
+	//Constructor Used to create SalesExecutive object
+    public SalesExecutive(String name, String username, String password) {
+
+    	// calling parent class constructor
+        super(name, username, password);
+
+    }
+
+}
