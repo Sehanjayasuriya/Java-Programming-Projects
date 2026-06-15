@@ -1,0 +1,253 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+File: TourTest.java
+
+Purpose:
+JUnit 5 test class for the Travel Australia Booking System.
+Tests three core functions, each with two valid inputs
+and one invalid/edge-case input.
+
+Functions Tested:
+  1. calculatePrice()     - Tests correct price calculation in CityTour
+  2. applyDiscount()      - Tests all discount tiers via calculatePrice()
+  3. calculateInsurance() - Tests insurance amount in QueenslandTour
+*/
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+public class TourTest {
+
+    // shared objects used across tests
+    private CityTour cityTourNoDiscount;
+    private CityTour cityTourFamilyPair;
+    private CityTour cityTourGroupDiscount;
+    private Customer testCustomer;
+
+    // set up fresh objects before each test to avoid shared state issues
+    @BeforeEach
+    public void setUp() {
+
+        // 2 adults, 0 children — no discount applies
+        cityTourNoDiscount = new CityTour(
+                "Melbourne City",
+                35, 25,
+                4,
+                2, 0,
+                "Pipa"
+        );
+
+        // 2 adults, 1 child — 10% family discount applies
+        cityTourFamilyPair = new CityTour(
+                "Melbourne City + Yarra River Boat Cruise",
+                65, 40,
+                6,
+                2, 1,
+                "Karen"
+        );
+
+        // 2 adults, 2 children — 15% group discount applies
+        cityTourGroupDiscount = new CityTour(
+                "Yarra River Cruise + Melbourne Zoo",
+                75, 45,
+                6,
+                2, 2,
+                "Benjamin"
+        );
+
+        // customer used for Queensland and International tours
+        testCustomer = new Customer("John Silva", "0771234567");
+    }
+
+
+    // ════════════════════════════════════════════════════════════════
+    // FUNCTION 1: calculatePrice() — tests correct price totals
+    //   Valid   1 → 2 adults, 0 children (no discount)
+    //   Valid   2 → 1 adult,  0 children (single passenger)
+    //   Invalid   → 0 adults, 0 children (edge case: empty booking)
+    // ════════════════════════════════════════════════════════════════
+
+    // Valid Test 1
+    // 2 adults at $35, 0 children at $25 — no discount rule met
+    // Expected: 2 x $35 = $70.00
+    @Test
+    public void testCalculatePrice_TwoAdultsNoChildren_ReturnsCorrectTotal() {
+
+        double expected = 70.00;
+        double actual   = cityTourNoDiscount.calculatePrice();
+
+        assertEquals(expected, actual, 0.001,
+            "2 adults x $35 with no discount should equal $70.00");
+    }
+
+    // Valid Test 2
+    // 1 adult at $35, 0 children — single passenger, no discount
+    // Expected: 1 x $35 = $35.00
+    @Test
+    public void testCalculatePrice_OneAdultOnly_ReturnsCorrectTotal() {
+
+        CityTour singleAdult = new CityTour(
+                "Melbourne City",
+                35, 25,
+                4,
+                1, 0,
+                "Pipa"
+        );
+
+        double expected = 35.00;
+        double actual   = singleAdult.calculatePrice();
+
+        assertEquals(expected, actual, 0.001,
+            "1 adult x $35 with no discount should equal $35.00");
+    }
+
+    // Invalid Test (Edge Case)
+    // 0 adults, 0 children — empty booking should produce $0.00
+    // In practice the menu prevents this, but the model must handle it safely
+    @Test
+    public void testCalculatePrice_ZeroPassengers_ReturnsZero() {
+
+        CityTour emptyBooking = new CityTour(
+                "Melbourne City",
+                35, 25,
+                4,
+                0, 0,
+                "Pipa"
+        );
+
+        double expected = 0.00;
+        double actual   = emptyBooking.calculatePrice();
+
+        assertEquals(expected, actual, 0.001,
+            "Zero passengers should produce a total price of $0.00");
+    }
+
+
+    // ════════════════════════════════════════════════════════════════
+    // FUNCTION 2: applyDiscount() — tested via calculatePrice()
+    //   Valid   1 → 2A+1C triggers 10% discount
+    //   Valid   2 → 2A+2C triggers 15% discount
+    //   Invalid   → 2A+0C — no discount rule met, total unchanged
+    // ════════════════════════════════════════════════════════════════
+
+    // Valid Test 1
+    // 2 adults at $65, 1 child at $40 — 2A+1C qualifies for 10% discount
+    // Base: (2x65) + (1x40) = $170. After 10%: $170 x 0.9 = $153.00
+    @Test
+    public void testApplyDiscount_TwoAdultsOneChild_TenPercentDiscount() {
+
+        double expected = 153.00;
+        double actual   = cityTourFamilyPair.calculatePrice();
+
+        assertEquals(expected, actual, 0.001,
+            "2A+1C should receive a 10% discount: $170 x 0.90 = $153.00");
+    }
+
+    // Valid Test 2
+    // 2 adults at $75, 2 children at $45 — 4 people qualifies for 15% discount
+    // Base: (2x75) + (2x45) = $240. After 15%: $240 x 0.85 = $204.00
+    @Test
+    public void testApplyDiscount_FourPeople_FifteenPercentDiscount() {
+
+        double expected = 204.00;
+        double actual   = cityTourGroupDiscount.calculatePrice();
+
+        assertEquals(expected, actual, 0.001,
+            "4 passengers should receive a 15% discount: $240 x 0.85 = $204.00");
+    }
+
+    // Invalid Test
+    // 2 adults, 0 children — does NOT meet any discount rule
+    // Total must remain unchanged at $70.00 (no discount applied)
+    @Test
+    public void testApplyDiscount_TwoAdultsNoChildren_NoDiscountApplied() {
+
+        double expected = 70.00; // $35 x 2, no change
+        double actual   = cityTourNoDiscount.calculatePrice();
+
+        assertEquals(expected, actual, 0.001,
+            "2 adults, 0 children should receive NO discount — total stays $70.00");
+    }
+
+
+    // ════════════════════════════════════════════════════════════════
+    // FUNCTION 3: calculateInsurance() — tests insurance amounts
+    //   Valid   1 → Single insurance selected  → returns $200
+    //   Valid   2 → Family insurance selected  → returns $500
+    //   Invalid   → No insurance selected      → returns $0
+    // ════════════════════════════════════════════════════════════════
+
+    // Valid Test 1
+    // Queensland tour with Single insurance — should return $200
+    @Test
+    public void testCalculateInsurance_SingleCover_ReturnsTwoHundred() {
+
+        QueenslandTour qTour = new QueenslandTour(
+                "Gold Coast",
+                600, 450,
+                1, 0,
+                "Melbourne Airport",
+                150,
+                "Single", 200,
+                testCustomer,
+                "Karen"
+        );
+
+        double expected = 200.00;
+        double actual   = qTour.calculateInsurance();
+
+        assertEquals(expected, actual, 0.001,
+            "Single insurance should return $200.00");
+    }
+
+    // Valid Test 2
+    // Queensland tour with Family insurance — should return $500
+    @Test
+    public void testCalculateInsurance_FamilyCover_ReturnsFiveHundred() {
+
+        QueenslandTour qTour = new QueenslandTour(
+                "Cairns",
+                850, 700,
+                2, 2,
+                "Sydney Airport",
+                150,
+                "Family", 500,
+                testCustomer,
+                "Benjamin"
+        );
+
+        double expected = 500.00;
+        double actual   = qTour.calculateInsurance();
+
+        assertEquals(expected, actual, 0.001,
+            "Family insurance should return $500.00");
+    }
+
+    // Invalid Test (Edge Case)
+    // Queensland tour with no insurance selected (price = 0)
+    // calculateInsurance() must return 0 — not throw an error
+    @Test
+    public void testCalculateInsurance_NoInsuranceSelected_ReturnsZero() {
+
+        QueenslandTour qTour = new QueenslandTour(
+                "Gold Coast",
+                600, 450,
+                2, 0,
+                "Melbourne Airport",
+                150,
+                "No Insurance", 0, // insurance price is 0
+                testCustomer,
+                "Pipa"
+        );
+
+        double expected = 0.00;
+        double actual   = qTour.calculateInsurance();
+
+        assertEquals(expected, actual, 0.001,
+            "No insurance selected should return $0.00");
+    }
+
+}
