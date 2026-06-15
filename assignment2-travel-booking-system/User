@@ -1,0 +1,49 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This class represents a system user
+in the Travel Australia Booking System.
+
+This class is the parent class for:
+- Admin
+- SalesExecutive
+
+Features:
+- Stores user details
+- Stores login credentials
+- Provides getter methods
+*/
+
+public class User {
+
+    private String name;
+    private String username;
+    private String password;
+
+    //constructor Used to initialize user details
+    public User(String name, String username, String password) {
+
+        this.name = name;
+        this.username = username;
+        this.password = password;
+
+    }
+
+    //getters
+    public String getName() {
+        return name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+
+
+}
