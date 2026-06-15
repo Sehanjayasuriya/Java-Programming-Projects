@@ -1,0 +1,22 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This is a user-defined exception class
+used in the Travel Australia Booking System.
+
+This exception is thrown when a user
+tries to create an International Tour
+booking without selecting insurance.
+
+The class inherits from the Exception class.
+*/
+public class NoInsuranceException extends Exception {
+
+	//constructor accepts custom error message and passes it to parent exception class
+    public NoInsuranceException(String message) {
+        super(message);
+        
+    }
+}
