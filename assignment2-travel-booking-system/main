@@ -1,0 +1,1077 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+Travel Australia Tour Booking System
+
+This program allows staff to:
+- Login as Admin or Sales Executive
+- Add tour bookings
+- Search bookings
+- Cancel bookings
+- Generate sales reports
+- Save and load users using files
+- Manage insurance for tours
+*/
+
+
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+
+public class Main {
+	
+	//Login method, Checks username and password, Returns logged-in user object
+	public static User login(ArrayList<User> users, Scanner input) {
+
+	    System.out.println("===== Login =====");
+
+	    System.out.print("Enter Username: ");
+	    String username = input.next();
+
+	    System.out.print("Enter Password: ");
+	    String password = input.next();
+
+	 // checking all users in Users arraylist
+	    for(User u : users) {
+
+	        if(u.getUsername().equals(username) && u.getPassword().equals(password)) {
+
+	            System.out.println("Login Successful");
+	            System.out.println("Welcome " + u.getName());
+
+	            return u;
+
+	        }
+
+	    }
+
+	    System.out.println("Invalid Username or Password");
+
+	    return null;
+
+	}
+	
+	//Adds a new sales executive, Admin only feature
+	public static void addSalesExecutive(ArrayList<User> users, Scanner input) {
+
+	    input.nextLine();
+
+	    System.out.print("Enter Executive Name: ");
+	    String name = input.nextLine();
+
+	    System.out.print("Enter Username: ");
+	    String username = input.nextLine();
+
+	    System.out.print("Enter Password: ");
+	    String password = input.nextLine();
+
+	 // creating executive objec
+	    SalesExecutive executive = new SalesExecutive(name, username, password);
+
+	    users.add(executive);
+	 // saving users to file
+	    saveUsers(users);
+
+	    System.out.println("Sales Executive Added Successfully");
+
+	}
+	
+	//Admin menu Allows admin functions
+	public static void adminMenu(ArrayList<User> users, Scanner input) {
+
+	    int adminChoice;
+
+	    do {
+
+	        System.out.println("\n===== ADMIN MENU =====");
+
+	        System.out.println("1. Add Sales Executive");
+	        System.out.println("2. View Users");
+	        System.out.println("3. Logout");
+
+	        System.out.print("Enter Option: ");
+	        adminChoice = input.nextInt();
+
+	        switch(adminChoice) {
+
+	            case 1:
+	                addSalesExecutive(users, input);
+	                break;
+
+	            case 2:
+	            	// display all users in user arraylist
+	                for(User u : users) {
+	                    System.out.println("Name: " + u.getName()+ " | Username: " + u.getUsername());
+	                }
+	                break;
+
+	            case 3:
+	                System.out.println("Logging Out...");
+	                break;
+
+	            default:
+	                System.out.println("Invalid Option");
+
+	        }
+
+	    }while(adminChoice != 3);
+
+	}
+	
+	
+	//Saves users into users.txt file
+	public static void saveUsers(ArrayList<User> users) {
+
+	    try {
+	        PrintWriter pw = new PrintWriter(
+	                new FileWriter("users.txt")
+	        );
+
+	        
+	        // writing all users into file
+	        for(User u : users) {
+	            pw.println(
+	                    u.getName() + "," +
+	                    u.getUsername() + "," +
+	                    u.getPassword() + "," +
+	                    u.getClass().getSimpleName());
+	        }
+	        pw.close();
+	        System.out.println("Users Saved Successfully");
+	    }
+
+	    catch(IOException e) {
+	        System.out.println("Error Saving Users");
+	    }
+	}
+	
+	
+	//Loads users from file
+	public static void loadUsers(ArrayList<User> users) {
+
+	    try {
+
+	        File file = new File("users.txt");
+	        Scanner fileReader = new Scanner(file);
+
+	        // reading all lines
+	        while(fileReader.hasNextLine()) {
+	            String line = fileReader.nextLine();
+	            String[] data = line.split(",");
+
+	            // extracting values
+	            String name = data[0];
+	            String username = data[1];
+	            String password = data[2];
+	            String role = data[3];
+
+	            // creating objects
+	            if(role.equals("Admin")) {
+	                users.add(new Admin(name, username, password));
+	            }
+	            else if(role.equals("SalesExecutive")) {
+
+	                users.add(
+	                        new SalesExecutive(
+	                                name,
+	                                username,
+	                                password
+	                        )
+	                );
+
+	            }
+
+	        }
+
+	        fileReader.close();
+	        System.out.println("Users Loaded Successfully");
+
+	    }
+
+	    catch(FileNotFoundException e) {
+
+	        System.out.println("No User File Found");
+
+	    }
+
+	}
+	
+	
+	// Displays sales report, Shows total sales by each executive
+	public static void salesReport(ArrayList<Tour> bookings) {
+
+	    ArrayList<String> checkedNames = new ArrayList<>();
+
+	    System.out.println("\n===== SALES REPORT =====");
+
+	    for(Tour t : bookings) {
+
+	        String name = t.getSalesExecutiveName();
+
+	        // avoid duplicate names
+	        if(!checkedNames.contains(name)) {
+
+	            double totalSales = 0;
+
+	            for(Tour tour : bookings) {
+
+	                if(tour.getSalesExecutiveName().equals(name)) {
+
+	                    totalSales += tour.calculatePrice();
+
+	                }
+
+	            }
+	            System.out.println(name + " : $" + totalSales);
+	            checkedNames.add(name);
+
+	        }
+
+	    }
+
+	}
+	
+	
+	//Adds city tour booking
+	public static void addCityTour(
+	        ArrayList<Tour> bookings,
+	        Scanner input,
+	        User currentUser
+	) {
+		// city tour menu
+
+	    System.out.println("===== City Tours =====");
+
+	    System.out.println("1. Melbourne City");
+	    System.out.println("2. Melbourne City + Yarra River Boat Cruise");
+	    System.out.println("3. Yarra River Cruise + Melbourne Zoo");
+	    System.out.println("4. Melbourne City + Melbourne Zoo");
+	    System.out.println("5. Melbourne City + Melbourne Aquarium");
+
+	    System.out.print("Choose Tour: ");
+
+	    int choice = input.nextInt();
+
+	    // variables for selected tour
+	    String tourName = "";
+	    double adultPrice = 0;
+	    double childPrice = 0;
+	    int duration = 0;
+
+	    // selecting tour
+	    switch(choice) {
+
+	        case 1:
+	            tourName = "Melbourne City";
+	            adultPrice = 35;
+	            childPrice = 25;
+	            duration = 4;
+	            break;
+
+	        case 2:
+	            tourName = "Melbourne City + Yarra River Boat Cruise";
+	            adultPrice = 65;
+	            childPrice = 40;
+	            duration = 6;
+	            break;
+
+	        case 3:
+	            tourName = "Yarra River Cruise + Melbourne Zoo";
+	            adultPrice = 75;
+	            childPrice = 45;
+	            duration = 6;
+	            break;
+
+	        case 4:
+	            tourName = "Melbourne City + Melbourne Zoo";
+	            adultPrice = 65;
+	            childPrice = 40;
+	            duration = 7;
+	            break;
+
+	        case 5:
+	            tourName = "Melbourne City + Melbourne Aquarium";
+	            adultPrice = 75;
+	            childPrice = 45;
+	            duration = 6;
+	            break;
+
+	        default:
+	            System.out.println("Invalid Tour");
+	            return;
+
+	    }
+
+	    System.out.print("Enter Adult Count: ");
+	    int adultCount = input.nextInt();
+
+	    System.out.print("Enter Child Count: ");
+	    int childCount = input.nextInt();
+
+	    // tour capacity validation
+	    if(adultCount + childCount > 40) {
+
+	        System.out.println("Tour capacity exceeded");
+
+	        return;
+
+	    }
+
+	    // creating city tour object
+	    CityTour newBooking =
+	            new CityTour(
+	                    tourName,
+	                    adultPrice,
+	                    childPrice,
+	                    duration,
+	                    adultCount,
+	                    childCount,
+	                    currentUser.getName()
+	            );
+
+	    bookings.add(newBooking);
+
+	    System.out.println("Booking Added Successfully");
+
+	}
+
+	public static void searchBooking(ArrayList<Tour>bookings, int searchTicket) {
+		boolean found = false;
+		for(Tour t: bookings) {
+			if(t.getTicketNumber()==searchTicket) {
+				t.displayTour();
+				found = true;
+			}
+		}
+		if(!found) {
+			System.out.println("Ticket not found");
+		}
+	}
+	
+	//add attraction tour
+	public static void addAttractionsTour(
+	        ArrayList<Tour> bookings,
+	        Scanner input,
+	        User currentUser
+	) {
+
+	    System.out.println("===== Attractions Tours =====");
+
+	    System.out.println("1. Great Ocean Road");
+	    System.out.println("2. Yarra Valley Wine Tasting");
+	    System.out.println("3. Wilson Prom");
+	    System.out.println("4. Phillip Island + Penguin Parade");
+
+	    System.out.print("Choose Tour: ");
+
+	    int choice = input.nextInt();
+
+	    String tourName = "";
+	    double adultPrice = 0;
+	    double childPrice = 0;
+
+	    switch(choice) {
+
+	        case 1:
+	            tourName = "Great Ocean Road";
+	            adultPrice = 135;
+	            childPrice = 90;
+	            break;
+
+	        case 2:
+	            tourName = "Yarra Valley Wine Tasting";
+	            adultPrice = 85;
+	            childPrice = 60;
+	            break;
+
+	        case 3:
+	            tourName = "Wilson Prom";
+	            adultPrice = 110;
+	            childPrice = 90;
+	            break;
+
+	        case 4:
+	            tourName = "Phillip Island + Penguin Parade";
+	            adultPrice = 160;
+	            childPrice = 120;
+	            break;
+
+	        default:
+	            System.out.println("Invalid Tour");
+	            return;
+
+	    }
+
+	    System.out.print("Enter Adult Count: ");
+	    int adultCount = input.nextInt();
+
+	    System.out.print("Enter Child Count: ");
+	    int childCount = input.nextInt();
+
+	    if(adultCount + childCount > 40) {
+
+	        System.out.println("Tour capacity exceeded");
+	        return;
+
+	    }
+
+	    input.nextLine();
+
+	    System.out.println("Pickup Locations");
+
+	    System.out.println("1. Flinders Station");
+	    System.out.println("2. Southern Cross Station");
+	    System.out.println("3. Queen Victoria Market");
+	    System.out.println("4. Melbourne Museum");
+	    System.out.println("5. Travel Australia CBD Office");
+
+	    System.out.print("Choose Pickup Location: ");
+
+	    int pickupChoice = input.nextInt();
+
+	    input.nextLine();
+
+	    //choose pickup location
+	    String pickupLocation = "";
+
+	    switch(pickupChoice) {
+
+	        case 1:
+	            pickupLocation = "Flinders Station";
+	            break;
+
+	        case 2:
+	            pickupLocation = "Southern Cross Station";
+	            break;
+
+	        case 3:
+	            pickupLocation = "Queen Victoria Market";
+	            break;
+
+	        case 4:
+	            pickupLocation = "Melbourne Museum";
+	            break;
+	            
+	        case 5:
+	            pickupLocation ="Travel Australia CBD Office";
+	            break;
+
+	        default:
+	            System.out.println("Invalid Pickup Location");
+	            return;
+
+	    }
+
+	    System.out.print("Enter Customer Name: ");
+	    String customerName = input.nextLine();
+
+	    System.out.print("Enter Contact Number: ");
+	    String contactNumber = input.nextLine();
+
+	    Customer customer =
+	            new Customer(customerName, contactNumber);
+
+	    AttractionsTour newBooking =
+	            new AttractionsTour(
+	                    tourName,
+	                    adultPrice,
+	                    childPrice,
+	                    adultCount,
+	                    childCount,
+	                    pickupLocation,
+	                    customer,
+	                    currentUser.getName()
+	            );
+
+	    bookings.add(newBooking);
+
+	    System.out.println("Booking Added Successfully");
+
+	}
+	
+	//add queensland tour
+	public static void addQueenslandTour(
+	        ArrayList<Tour> bookings,
+	        Scanner input,
+	        User currentUser
+	) {
+
+	    System.out.println("===== Queensland Tours =====");
+
+	    System.out.println("1. Cairns");
+	    System.out.println("2. Gold Coast");
+
+	    System.out.print("Choose Tour: ");
+
+	    int choice = input.nextInt();
+
+	    String tourName = "";
+	    double adultPrice = 0;
+	    double childPrice = 0;
+
+	    switch(choice) {
+
+	        case 1:
+	            tourName = "Cairns";
+	            adultPrice = 850;
+	            childPrice = 700;
+	            break;
+
+	        case 2:
+	            tourName = "Gold Coast";
+	            adultPrice = 600;
+	            childPrice = 450;
+	            break;
+
+	        default:
+	            System.out.println("Invalid Tour");
+	            return;
+
+	    }
+
+	    System.out.print("Enter Adult Count: ");
+	    int adultCount = input.nextInt();
+
+	    System.out.print("Enter Child Count: ");
+	    int childCount = input.nextInt();
+
+	    //maximum capacity
+	    if(adultCount + childCount > 40) {
+
+	        System.out.println("Tour capacity exceeded");
+	        return;
+
+	    }
+
+	    input.nextLine();
+
+	    System.out.print("Enter Boarding Airport: ");
+	    String boardingAirport = input.nextLine();
+
+	    int totalPeople = adultCount + childCount;
+
+	    double pickupCost;
+
+	    // calculating pickup cost
+	    if(totalPeople <= 6) {
+
+	        pickupCost = 150;
+
+	        System.out.println(
+	                "Pickup Cost Automatically Added: 150"
+	        );
+
+	    }
+
+	    else {
+
+	        System.out.print("Enter Pickup Cost: ");
+
+	        pickupCost = input.nextDouble();
+
+	        input.nextLine();
+
+	    }
+
+	    System.out.print("Enter Customer Name: ");
+
+	    String customerName = input.nextLine();
+
+	    System.out.print("Enter Contact Number: ");
+
+	    String contactNumber = input.nextLine();
+
+	    String insuranceType = "No Insurance";
+
+	    double insurancePrice = 0;
+
+	    System.out.print("Do you want insurance? (Y/N): ");
+
+	    String answer = input.nextLine();
+
+	    // optional insurance selection
+	    if(answer.equalsIgnoreCase("Y")) {
+
+	        System.out.println("1. Single - 200");
+	        System.out.println("2. Couple - 350");
+	        System.out.println("3. Family - 500");
+
+	        System.out.print("Choose Insurance Type: ");
+
+	        int insuranceChoice = input.nextInt();
+
+	        input.nextLine();
+
+	        switch(insuranceChoice) {
+
+	            case 1:
+	                insuranceType = "Single";
+	                insurancePrice = 200;
+	                break;
+
+	            case 2:
+	                insuranceType = "Couple";
+	                insurancePrice = 350;
+	                break;
+
+	            case 3:
+	                insuranceType = "Family";
+	                insurancePrice = 500;
+	                break;
+
+	            default:
+	                System.out.println("Invalid Insurance");
+	                return;
+
+	        }
+
+	    }
+
+	    Customer customer =
+	            new Customer(customerName, contactNumber);
+
+	    QueenslandTour newBooking =
+	            new QueenslandTour(
+	                    tourName,
+	                    adultPrice,
+	                    childPrice,
+	                    adultCount,
+	                    childCount,
+	                    boardingAirport,
+	                    pickupCost,
+	                    insuranceType,
+	                    insurancePrice,
+	                    customer,
+	                    currentUser.getName()
+	            );
+
+	    bookings.add(newBooking);
+
+	    System.out.println("Booking Added Successfully");
+
+	}
+	
+	//add international tour. Insurance is mandatory
+	public static void addInternationalTour(
+	        ArrayList<Tour> bookings,
+	        Scanner input,
+	        User currentUser
+	) {
+
+	    try {
+
+	        System.out.println(
+	                "===== International Tours ====="
+	        );
+
+	        System.out.println("1. Phuket");
+	        System.out.println("2. Pattaya");
+	        System.out.println("3. Singapore");
+
+	        System.out.print("Choose Tour: ");
+
+	        int choice = input.nextInt();
+
+	        // variables for selected tour
+	        String tourName = "";
+	        double adultPrice = 0;
+	        double childPrice = 0;
+
+	        // selecting international tour
+	        switch(choice) {
+
+	            case 1:
+	                tourName = "Phuket";
+	                adultPrice = 1350;
+	                childPrice = 1100;
+	                break;
+
+	            case 2:
+	                tourName = "Pattaya";
+	                adultPrice = 1400;
+	                childPrice = 1150;
+	                break;
+
+	            case 3:
+	                tourName = "Singapore";
+	                adultPrice = 1200;
+	                childPrice = 1000;
+	                break;
+
+	            default:
+	                System.out.println("Invalid Tour");
+	                return;
+
+	        }
+
+	        System.out.print("Enter Adult Count: ");
+
+	        int adultCount = input.nextInt();
+
+	        System.out.print("Enter Child Count: ");
+
+	        int childCount = input.nextInt();
+
+	        // capacity validation
+	        if(adultCount + childCount > 40) {
+
+	            System.out.println("Tour capacity exceeded");
+	            return;
+
+	        }
+
+	        input.nextLine();
+
+	        System.out.print("Enter Boarding Airport: ");
+
+	        String boardingAirport = input.nextLine();
+
+	        // pickup cost calculation
+	        int totalPeople = adultCount + childCount;
+
+	        double pickupCost;
+
+	        if(totalPeople <= 6) {
+
+	            pickupCost = 150;
+
+	            System.out.println(
+	                    "Pickup Cost Automatically Added: 150"
+	            );
+
+	        }
+
+	        else {
+
+	            System.out.print("Enter Pickup Cost: ");
+
+	            pickupCost = input.nextDouble();
+
+	            input.nextLine();
+
+	        }
+
+	        // insurance menu
+	        System.out.println("1. Single - 200");
+	        System.out.println("2. Couple - 350");
+	        System.out.println("3. Family - 500");
+
+	        System.out.print("Choose Insurance Type: ");
+
+	        int insuranceChoice = input.nextInt();
+
+	        input.nextLine();
+
+	        String insuranceType = "";
+
+	        double insurancePrice = 0;
+
+	        switch(insuranceChoice) {
+
+	            case 1:
+	                insuranceType = "Single";
+	                insurancePrice = 200;
+	                break;
+
+	            case 2:
+	                insuranceType = "Couple";
+	                insurancePrice = 350;
+	                break;
+
+	            case 3:
+	                insuranceType = "Family";
+	                insurancePrice = 500;
+	                break;
+
+	            default:
+	            	// custom exception
+	                throw new NoInsuranceException(
+	                        "International Tour requires insurance"
+	                );
+
+	        }
+
+	        // customer details
+	        System.out.print("Enter Customer Name: ");
+
+	        String customerName = input.nextLine();
+
+	        System.out.print("Enter Contact Number: ");
+
+	        String contactNumber = input.nextLine();
+
+	        Customer customer =
+	                new Customer(customerName, contactNumber);
+
+	        // international booking object
+	        InternationalTour newBooking =
+	                new InternationalTour(
+	                        tourName,
+	                        adultPrice,
+	                        childPrice,
+	                        adultCount,
+	                        childCount,
+	                        boardingAirport,
+	                        pickupCost,
+	                        insuranceType,
+	                        insurancePrice,
+	                        currentUser.getName(),
+	                        customer
+	                );
+
+	        bookings.add(newBooking);
+
+	        System.out.println(
+	                "Booking Added Successfully"
+	        );
+
+	    }
+
+	    // exception handling
+	    catch(NoInsuranceException e) {
+
+	        System.out.println(e.getMessage());
+
+	    }
+
+	}
+	
+	
+	//Cancels booking using ticket number,  Refunds 75% of total amount
+	public static void cancelBooking(
+	        ArrayList<Tour> bookings,
+	        int searchTicket
+	) {
+
+	    boolean found = false;
+
+	    // searching booking
+	    for(Tour t : bookings) {
+
+	        if(t.getTicketNumber() == searchTicket) {
+
+	        	// check already cancelled
+	            if(t.isCancelled()) {
+
+	                System.out.println(
+	                        "Ticket already cancelled"
+	                );
+
+	                return;
+
+	            }
+
+	            // refund calculation
+	            double refund =
+	                    t.calculatePrice() * 0.75;
+
+	            System.out.println(
+	                    "Refund: " + refund
+	            );
+
+	            // mark as cancelled
+	            t.setCancelled(true);
+
+	            System.out.println(
+	                    "Ticket Cancelled"
+	            );
+
+	            found = true;
+
+	        }
+
+	    }
+
+	    if(!found) {
+
+	        System.out.println("Ticket not found");
+
+	    }
+
+	}
+	
+	
+	//Displays all bookings
+    public static void printBookings(ArrayList<Tour> bookings) {
+
+    	// displaying all bookings
+        for(Tour t : bookings) {
+
+            t.displayTour();
+            System.out.println();
+
+        }
+
+    }
+    
+    //Prints bookings for a specific tour
+    public static void printSpecificTour(
+            ArrayList<Tour> bookings,
+            Scanner input
+    ) {
+
+        input.nextLine();
+
+        System.out.print("Enter Tour Name: ");
+
+        String searchTour =
+                input.nextLine();
+
+        boolean found = false;
+
+        // searching bookings by tour name
+        for(Tour t : bookings) {
+
+            if(t.getTourName().equalsIgnoreCase(searchTour)) {
+                t.displayTour();
+                System.out.println();
+                found = true;
+
+            }
+
+        }
+
+        if(!found) {
+
+            System.out.println("Tour not found");
+
+        }
+
+    }
+
+    
+    //Main method starting point of the program
+    public static void main(String[] args) {
+
+    	//ArrayList to store bookings
+        ArrayList<Tour> bookings = new ArrayList<>();
+        
+        // ArrayList to store users
+        ArrayList<User> users = new ArrayList<>();
+
+        // loading users from file
+        loadUsers(users);
+
+        // create default admin if no users exist
+        if(users.isEmpty()) {
+
+            Admin admin = new Admin(
+                    "Admin",
+                    "admin",
+                    "admin123"
+            );
+
+            users.add(admin);
+            saveUsers(users);
+
+        }
+        
+        Scanner input = new Scanner(System.in);
+        
+        //current logged in user
+        User currentUser = null;
+        
+        //login validation loop
+        while(currentUser == null) {
+
+            currentUser = login(users, input);
+
+        }
+        
+        //admin access only to admin menu
+        if(currentUser instanceof Admin) {
+
+            adminMenu(users, input);
+            input.close();
+            return;
+
+        }
+        
+        int choice;
+
+        // main system menu
+        do {
+
+            System.out.println("\nTravel Australia");
+            System.out.println("1. Add City Tour");
+            System.out.println("2. Add Attractions Tour");
+            System.out.println("3. Add Queensland Tour");
+            System.out.println("4. Add International Tour");
+            System.out.println("5. Print Bookings");
+            System.out.println("6. Print Specific Tour ");
+            System.out.println("7. Search Ticket");
+            System.out.println("8. Cancel Ticket");
+            System.out.println("9. Sales Report");
+            System.out.println("10. Exit");
+
+            System.out.print("Enter Option: ");
+
+            choice = input.nextInt();
+
+            switch(choice) {
+            
+            	case 1:
+            		addCityTour(bookings,input,currentUser);
+            		break;
+            		
+            	case 2:
+            	    addAttractionsTour(bookings, input, currentUser);
+            	    break;
+            	
+            	case 3:
+            		addQueenslandTour(bookings,input,currentUser);
+            		break;
+            		
+            	case 4:
+            		addInternationalTour(bookings,input,currentUser);
+            		break;
+
+                case 5:
+                    printBookings(bookings);
+                    break;
+                    
+                case 6:
+                    printSpecificTour(bookings, input);
+                    break;
+                    
+                case 7:
+                	System.out.println("Enter Ticket Number: ");
+                	int searchTicket = input.nextInt();
+                	
+                	searchBooking(bookings, searchTicket);
+                	break;
+                	
+                case 8:
+                	System.out.println("Enter Ticket Number: ");
+                	int cancelTicket=input.nextInt();
+                	
+                	cancelBooking(bookings, cancelTicket);
+                	break;
+                	
+                case 9:
+                	salesReport(bookings);
+                	break;
+
+                case 10:
+
+                    System.out.println("Exiting...");
+                    break;
+
+                default:
+
+                    System.out.println("Invalid Option");
+
+            }
+
+        }while(choice != 10);
+
+        input.close();
+    }
+
+}
