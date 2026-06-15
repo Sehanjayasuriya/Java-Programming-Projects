@@ -1,0 +1,24 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This class represents the Admin user of the
+Travel Australia Booking System.
+
+The Admin can:
+- Add Sales Executives
+- View system users
+- Manage login accounts
+
+This class inherits from the User class.
+*/
+public class Admin extends User {
+
+    public Admin(String name, String username, String password) {
+
+        super(name, username, password);
+
+    }
+
+}
