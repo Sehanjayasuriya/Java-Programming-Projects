@@ -1,0 +1,98 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This class represents Queensland Tour bookings
+in the Travel Australia Booking System.
+
+This class inherits from the Tour class
+and implements the Insurance interface.
+
+Features:
+- Stores Queensland tour details
+- Stores boarding airport details
+- Stores pickup cost
+- Stores optional insurance details
+- Stores customer details
+- Calculates total booking price
+*/
+
+public class QueenslandTour extends Tour implements Insurance {
+
+	private String insuranceType;
+	private double insurancePrice;
+	
+	// customer object associated with booking
+	private Customer customer;//Queensland has a customer
+	private String boardingAirport;
+	private double pickupCost;
+	
+	//Constructor Used to create QueenslandTour object
+	public QueenslandTour(String tourName, double adultPrice,
+			double childPrice, int adultCount,
+			int childCount, String boardingAirport,
+			double pickupCost, String insuranceType,
+		    double insurancePrice, Customer customer, String salesExecutiveName) {
+		
+		// calling parent class constructor
+		super(tourName,adultPrice,childPrice,adultCount,childCount, salesExecutiveName);
+		this.boardingAirport=boardingAirport;
+		this.pickupCost=pickupCost;
+		this.customer=customer;
+		this.insuranceType=insuranceType;
+		this.insurancePrice=insurancePrice;
+	}
+	
+	@Override
+	public void displayTour() {
+
+		//Displays Queensland tour details
+		System.out.println("========================");
+	    System.out.println("Tour Name: " + getTourName());
+	    System.out.println("Boarding Airport: " + boardingAirport);
+	    System.out.println("Pickup Cost: " + pickupCost);
+
+	    System.out.println("Adult Count: " + getAdultCount());
+	    System.out.println("Child Count: " + getChildCount());
+	    
+	    System.out.println("Insurance Type: " + insuranceType);
+	    System.out.println("Insurance Price: " + insurancePrice);
+	    
+	    System.out.println("Sales Executive: " + getSalesExecutiveName());
+
+	    System.out.println("Ticket Number: " + getTicketNumber());
+	    
+	    // display cancellation status
+	    if(isCancelled()) {
+
+	        System.out.println("STATUS: CANCELLED");
+
+	    }
+
+	    System.out.printf("Total Price: %.2f\n",calculatePrice());
+
+	    // display customer details
+	    customer.displayCustomer();
+	    System.out.println("========================");
+	    System.out.println();
+
+	}
+	
+	
+	//Calculates total Queensland tour price
+	@Override
+	public double calculatePrice() {
+		
+		//calculate ticket price
+		double total = (getAdultPrice()*getAdultCount()+(getChildPrice()*getChildCount()));
+		total = applyDiscount(total);
+		return total + pickupCost + insurancePrice;
+		
+	}
+	
+	@Override
+	public double calculateInsurance() {
+	    return insurancePrice;
+	}
+}
