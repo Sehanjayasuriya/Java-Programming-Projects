@@ -1,0 +1,78 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This class represents a City Tour in the
+Travel Australia Booking System.
+
+This class inherits from the Tour class and
+implements specific behavior for city tours.
+
+Features:
+- Stores city tour duration
+- Displays city tour details
+- Calculates total tour price
+- Applies discounts when needed
+*/
+public class CityTour extends Tour{
+
+	// duration of the city tour in hours
+	private int duration;
+	
+	
+    // Used to create a CityTour object
+	public CityTour(String tourName, double adultPrice, double childPrice, int duration, int adultCount, int childCount, String salesExecutiveName) {
+		
+		// calling parent class constructor
+		super(
+				tourName,
+				adultPrice,
+				childPrice,
+				adultCount,
+				childCount,
+				salesExecutiveName
+				); //to get the tourName, adultPrice variables from tour class
+		
+		// initialize duration
+		this.duration = duration;
+	}
+
+	
+
+	//replaces the display tour method in Tour.java
+	@Override 
+	public void displayTour() {
+		
+		System.out.println("\n========================");
+		System.out.println("Tour Name: " + getTourName());
+		System.out.println("Adult Price: " + getAdultPrice());
+		System.out.println("Adult Count: " + getAdultCount());
+		
+		System.out.println("Child Price: " + getChildPrice());
+		System.out.println("Child Count: " + getChildCount());
+		System.out.println("Duration: " + duration + " hours");
+		System.out.println("Ticket Number: " + getTicketNumber());
+		
+		// check whether the booking is cancelled
+		if(isCancelled()) {
+
+		    System.out.println("STATUS: CANCELLED");
+
+		}
+		System.out.printf("Total Price: %.2f\n" , calculatePrice());// %.2f\n used this to get cleaner output
+		System.out.println("Sales Executive: " + getSalesExecutiveName());
+		System.out.println("========================");
+		System.out.println();
+		
+	}
+	
+	@Override
+	public double calculatePrice() {
+		//useing getters because variables are private inside tour class
+		//to get total ticket price
+	    double total =(getAdultPrice() * getAdultCount()) + (getChildPrice() * getChildCount());
+	    return applyDiscount(total);
+
+	}
+}
