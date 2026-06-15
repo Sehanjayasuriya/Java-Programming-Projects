@@ -1,0 +1,107 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This class represents an Attractions Tour in the
+Travel Australia Booking System.
+
+This class inherits from the Tour class and is used
+to manage attraction tour bookings made by customers.
+
+Features:
+- Stores pickup location details
+- Stores customer information
+- Calculates total tour price
+- Displays full tour details
+*/
+
+
+public class AttractionsTour extends Tour {
+
+	// pickup location of the customer
+    private String pickupLocation;
+    
+    // customer object associated with the booking
+    private Customer customer;
+
+    /*
+      Constructor
+      Used to create an AttractionsTour object
+     */
+    public AttractionsTour(
+            String tourName,
+            double adultPrice,
+            double childPrice,
+            int adultCount,
+            int childCount,
+            String pickupLocation,
+            Customer customer,
+            String salesExecutiveName
+    ) {
+
+    	// calling parent class constructor
+        super(
+                tourName,
+                adultPrice,
+                childPrice,
+                adultCount,
+                childCount,
+                salesExecutiveName
+        );
+
+        // initialize pickup location
+        this.pickupLocation = pickupLocation;
+        
+        // initialize customer object
+        this.customer = customer;
+
+    }
+
+    @Override
+    public void displayTour() {
+
+    	System.out.println("\n========================");
+        System.out.println("Tour Name: " + getTourName());
+
+        System.out.println("Pickup Location: " + pickupLocation);
+
+        System.out.println("Adult Count: " + getAdultCount());
+
+        System.out.println("Child Count: " + getChildCount());
+
+        System.out.println("Ticket Number: " + getTicketNumber());
+
+        System.out.println("Sales Executive: " + getSalesExecutiveName());
+        
+        // check whether tour is cancelled
+        if(isCancelled()) {
+
+            System.out.println("STATUS: CANCELLED");
+
+        }
+
+        // display total calculated price
+        System.out.printf("Total Price: %.2f\n", calculatePrice());
+
+        
+     // display customer details
+        customer.displayCustomer();
+
+        System.out.println("========================");
+        System.out.println();
+    }
+
+    @Override
+    public double calculatePrice() {
+
+        double total =
+                (getAdultPrice() * getAdultCount())
+                +
+                (getChildPrice() * getChildCount());
+
+        return applyDiscount(total);
+
+    }
+
+}
