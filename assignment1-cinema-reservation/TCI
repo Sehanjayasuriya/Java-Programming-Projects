@@ -1,0 +1,411 @@
+package TCI_Insurance;
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+File Name: TCI.java
+
+Description:
+prototype Insurance Management System for ‘TakeCare Insurance - TCI’,
+a (fictitious) private insurance firm.
+*/
+
+import java.util.*;
+
+class Policy {
+
+    private static int idCounter = 1; //used to generate IDs
+
+    //Instance variables (store policy attributes)
+    private String policyID;
+    private String customerID;
+    private String coverType;
+    private double coverValue;
+    private String duration;
+    private double installment;
+    private String paymentPlan;
+    private String startDate;
+    private boolean active = true;
+
+    //constructor
+    public Policy(String customerID, String coverType, double coverValue,
+                  String duration, double installment,
+                  String paymentPlan, String startDate) {
+
+        this.policyID = "P" + idCounter++; //Auto ID P1,P2
+        this.customerID = customerID;
+        this.coverType = coverType;
+        this.coverValue = coverValue;
+        this.duration = duration;
+        this.installment = installment;
+        this.paymentPlan = paymentPlan;
+        this.startDate = startDate;
+    }
+
+    //getters
+    public String getPolicyID() { 
+    	return policyID;
+    	}
+    
+    public String getCustomerID() { 
+    	return customerID;
+    	}
+    
+    public double getCoverValue() { 
+    	return coverValue; 
+    	}
+    
+    public double getInstallment() { 
+    	return installment; 
+    	}
+    
+    public boolean isActive() {
+    	return active; 
+    	}
+
+    //marks policy inactive(Not delete)
+    public void deactivate() {
+    	active = false; 
+    	}
+
+    //modify policy details
+    public void updatePolicy(double coverValue, String duration,
+                             double installment, String paymentPlan) {
+        this.coverValue = coverValue;
+        this.duration = duration;
+        this.installment = installment;
+        this.paymentPlan = paymentPlan;
+    }
+
+    //prints policy details/ but only prints active policies
+    public void printPolicy() {
+        if (active) {
+            System.out.println(policyID + " | " + customerID + " | " +
+                    coverType + " | " + coverValue + " | " +
+                    duration + " | " + installment + " | " +
+                    paymentPlan + " | " + startDate);
+        }
+    }
+}
+
+//customer class
+class Customer {
+
+    private static int idCounter = 1;//creates C1,C2,...
+
+    
+    private String customerID;
+    private String name;
+    private String address;
+    private Policy[] policies = new Policy[5];//array holds 5 maximum policies for each customer 
+    private int policyCount = 0;
+
+    public Customer(String name, String address) {
+        this.customerID = "C" + idCounter++; //auto Id
+        this.name = name;
+        this.address = address;
+    }
+
+    public String getCustomerID() { return customerID; }
+    public String getName() { return name; }
+    public Policy[] getPolicies() { return policies; }
+    public int getPolicyCount() { return policyCount; }
+
+    public void addPolicy(Policy p) {
+    	//policy limit check
+        if (policyCount < 5) {
+            policies[policyCount++] = p;
+        } else {
+            System.out.println("Maximum 5 policies allowed.");
+        }
+    }
+
+    public void printCustomer() {
+        System.out.println(customerID + " | " + name + " | " + address);
+    }
+}
+
+//main class
+public class TCI {
+
+    static Customer[] customers = new Customer[7]; //max 7 customers
+    static int customerCount = 0;
+
+    public static void main(String[] args) {
+
+        Scanner input = new Scanner(System.in);
+        int choice;
+
+        do {
+            System.out.println("\n1 – Add Customer");
+            System.out.println("2 – Add Policy");
+            System.out.println("3 – Update Policy");
+            System.out.println("4 – Delete Policy");
+            System.out.println("5 – Search");
+            System.out.println("6 – Print All");
+            System.out.println("7 – Calculate Totals");
+            System.out.println("8 – Exit");
+            System.out.println("Enter choice:");
+
+            //Ensures user enters valid number inputs
+            while (!input.hasNextInt()) {
+                System.out.println("Invalid input. Enter a number.");
+                input.next();
+            }
+
+            choice = input.nextInt();
+            input.nextLine();
+
+            switch (choice) {
+
+                case 1:
+                    addCustomer(input);
+                    break;
+
+                case 2:
+                    addPolicy(input);
+                    break;
+
+                case 3:
+                    updatePolicy(input);
+                    break;
+
+                case 4:
+                    deletePolicy(input);
+                    break;
+
+                case 5:
+                    search(input);
+                    break;
+
+                case 6:
+                    printAll();
+                    break;
+
+                case 7:
+                    calculateTotals();
+                    break;
+            }
+
+        } while (choice != 8);
+    }
+
+    public static void addCustomer(Scanner input) {
+
+    	//limit check
+        if (customerCount >= 7) {
+            System.out.println("Maximum customers reached.");
+            return;
+        }
+
+        System.out.println("Enter name:");
+        String name = input.nextLine(); //reads full name
+
+        System.out.println("Enter address:");
+        String address = input.nextLine();
+
+        customers[customerCount++] = new Customer(name, address); //customer created and stored in array
+
+        System.out.println("Customer added successfully.");
+    }
+
+    public static double getValidDouble(Scanner input, String message) {
+
+        double value;
+
+        while (true) {
+            System.out.println(message);
+
+            if (input.hasNextDouble()) {
+                value = input.nextDouble();
+                input.nextLine();
+
+                if (value >= 0) {
+                    return value;
+                } else {
+                    System.out.println("Value must be non-negative.");
+                }
+
+            } else {
+                System.out.println("Invalid input. Enter a number.");
+                input.next(); //clear invalid inputs
+            }
+        }
+    }
+
+    public static void addPolicy(Scanner input) {
+
+        System.out.println("Enter Customer ID:");
+        String id = input.nextLine();
+
+        
+        //Searching customer
+        Customer c = findCustomer(id);
+
+        if (c == null) {
+            System.out.println("Customer not found.");
+            return;
+        }
+
+        //getting customer policy details
+        System.out.println("Enter Cover Type:");
+        String type = input.nextLine();
+
+        double value = getValidDouble(input, "Enter Cover Value:");
+
+        System.out.println("Enter Duration:");
+        String duration = input.nextLine();
+
+        double installment = getValidDouble(input, "Enter Installment:");
+
+        System.out.println("Enter Payment Plan:");
+        String plan = input.nextLine();
+
+        System.out.println("Enter Start Date:");
+        String date = input.nextLine();
+
+        Policy p = new Policy(id, type, value, duration, installment, plan, date);
+
+        c.addPolicy(p);
+
+        System.out.println("Policy added successfully.");
+    }
+
+    
+    public static void updatePolicy(Scanner input) {
+
+        System.out.println("Enter Policy ID:");
+        String pid = input.nextLine();
+
+        Policy p = findPolicy(pid);
+
+        if (p == null) {
+            System.out.println("Policy not found.");
+            return;
+        }
+
+        double value = getValidDouble(input, "Enter new Cover Value:");
+
+        System.out.println("Enter new Duration:");
+        String duration = input.nextLine();
+
+        double installment = getValidDouble(input, "Enter new Installment:");
+
+        System.out.println("Enter new Payment Plan:");
+        String plan = input.nextLine();
+
+        p.updatePolicy(value, duration, installment, plan);
+
+        System.out.println("Policy updated.");
+    }
+
+    public static void deletePolicy(Scanner input) {
+
+        System.out.println("Enter Policy ID:");
+        String pid = input.nextLine();
+
+        Policy p = findPolicy(pid);
+
+        if (p != null) {
+            p.deactivate();
+            System.out.println("Policy deactivated.");
+        } else {
+            System.out.println("Policy not found.");
+        }
+    }
+
+    public static void search(Scanner input) {
+
+        System.out.println("1 – By Customer ID");
+        System.out.println("2 – By Name");
+        System.out.println("3 – By Policy ID");
+
+        int choice = input.nextInt();
+        input.nextLine();
+
+        if (choice == 1) {
+            System.out.println("Enter Customer ID:");
+            Customer c = findCustomer(input.nextLine());
+            if (c != null) c.printCustomer();
+
+        } else if (choice == 2) {
+            System.out.println("Enter Name:");
+            String name = input.nextLine();
+
+            for (int i = 0; i < customerCount; i++) {
+            	if (customers[i].getName().equalsIgnoreCase(name)) {
+                    customers[i].printCustomer();
+                }
+            }
+
+        } else {
+            System.out.println("Enter Policy ID:");
+            Policy p = findPolicy(input.nextLine());
+            if (p != null) p.printPolicy();
+        }
+    }
+
+    public static void printAll() {
+
+        for (int i = 0; i < customerCount; i++) {
+
+            customers[i].printCustomer();
+
+            Policy[] policies = customers[i].getPolicies();
+
+            for (int j = 0; j < customers[i].getPolicyCount(); j++) {
+                policies[j].printPolicy();
+            }
+        }
+    }
+
+    public static void calculateTotals() {
+
+        double totalCover = 0;
+        double totalInstallment = 0;
+
+        for (int i = 0; i < customerCount; i++) {
+
+            Policy[] policies = customers[i].getPolicies();
+
+            for (int j = 0; j < customers[i].getPolicyCount(); j++) {
+
+            	//only active policies count
+                if (policies[j].isActive()) {
+                    totalCover += policies[j].getCoverValue();
+                    totalInstallment += policies[j].getInstallment();
+                }
+            }
+        }
+
+        System.out.println("Total Cover Value: " + totalCover);
+        System.out.println("Total Installment: " + totalInstallment);
+    }
+
+    //search by customer ID
+    public static Customer findCustomer(String id) {
+
+        for (int i = 0; i < customerCount; i++) {
+            if (customers[i].getCustomerID().equals(id)) {
+                return customers[i];
+            }
+        }
+        return null;
+    }
+
+    //search by policy ID
+    public static Policy findPolicy(String pid) {
+
+        for (int i = 0; i < customerCount; i++) {
+
+            Policy[] policies = customers[i].getPolicies();
+
+            for (int j = 0; j < customers[i].getPolicyCount(); j++) {
+
+                if (policies[j].getPolicyID().equals(pid)) {
+                    return policies[j];
+                }
+            }
+        }
+        return null;
+    }
+}
