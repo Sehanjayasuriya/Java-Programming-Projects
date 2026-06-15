@@ -1,1 +1,20 @@
+/*
+Name: Sehan Madusha
+Student ID: 106223861
+
+Purpose:
+This interface represents insurance functionality
+in the Travel Australia Booking System.
+
+The interface is implemented by tour classes
+that support travel insurance.
+
+Features:
+- Defines insurance calculation behavior
+- Used for Queensland and International tours
+*/
+public interface Insurance {
+
+	double calculateInsurance();
+}
 
